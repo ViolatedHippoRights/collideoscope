@@ -164,6 +164,7 @@ mod aabb_tests {
     use float_eq::assert_float_eq;
 
     use super::AABB;
+    use crate::{narrow::sat::SATable, vec2::Vec2};
 
     #[test]
     fn test_vertices() {
@@ -189,6 +190,22 @@ mod aabb_tests {
         assert_float_eq!(vertices[2].y, 2.5, abs <= 0.01);
         assert_float_eq!(vertices[3].x, -2.5, abs <= 0.01);
         assert_float_eq!(vertices[3].y, 2.5, abs <= 0.01);
+    }
+
+    #[test]
+    fn test_contains_point() {
+        let box0 = AABB::new(8.0, 4.0);
+        let box1 = AABB::new(1.0, 16.0);
+
+        assert!(box0.contains_point(Vec2::new(2.0, 2.0), Vec2::new(-1.0, 0.5)));
+        assert!(box0.contains_point(Vec2::new(10.0, 0.0), Vec2::new(7.0, 1.5)));
+        assert!(!box0.contains_point(Vec2::new(20.0, 20.0), Vec2::new(-1.0, 0.5)));
+        assert!(!box0.contains_point(Vec2::new(0.0, 0.0), Vec2::new(6.0, 1.0)));
+
+        assert!(box1.contains_point(Vec2::new(2.0, 2.0), Vec2::new(1.75, 3.5)));
+        assert!(box1.contains_point(Vec2::new(0.0, 8.0), Vec2::new(0.25, 15.0)));
+        assert!(!box1.contains_point(Vec2::new(20.0, 20.0), Vec2::new(-1.0, 0.5)));
+        assert!(!box1.contains_point(Vec2::new(0.0, 0.0), Vec2::new(6.0, 1.0)));
     }
 }
 
