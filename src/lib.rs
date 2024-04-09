@@ -1,4 +1,5 @@
 use num::Float;
+use std::fmt::Display;
 
 pub mod broad;
 pub mod narrow;
@@ -9,7 +10,7 @@ pub mod vec2;
 static CSCOPE_TOLERANCE_ABS: f64 = 0.0001;
 static CSCOPE_TOLERANCE_RELATIVE: f64 = 0.0001;
 
-pub trait NumTolerance: Float {
+pub trait NumTolerance: Display + Float {
     fn error_mixed(&self, rhs: Self) -> Self;
 
     fn error_relative(&self, rhs: Self) -> Self;

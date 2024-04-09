@@ -1,13 +1,14 @@
-use num::Float;
 use std::ops::{Add, Neg, Sub};
 
+use crate::NumTolerance;
+
 #[derive(Clone, Copy)]
-pub struct Vec2<T: Float> {
+pub struct Vec2<T: NumTolerance> {
     pub x: T,
     pub y: T,
 }
 
-impl<T: Float> Vec2<T> {
+impl<T: NumTolerance> Vec2<T> {
     pub fn zero() -> Self {
         Self {
             x: T::zero(),
@@ -43,9 +44,13 @@ impl<T: Float> Vec2<T> {
     pub fn rotate_clock_90(&self) -> Self {
         Self::new(self.y, -self.x)
     }
+
+    pub fn perp(&self, vec: Vec2<T>) -> bool {
+        self.dot(vec).is_trivial_abs()
+    }
 }
 
-impl<T: Float> Add<Vec2<T>> for Vec2<T> {
+impl<T: NumTolerance> Add<Vec2<T>> for Vec2<T> {
     type Output = Vec2<T>;
 
     fn add(self, rhs: Vec2<T>) -> Self::Output {
@@ -53,7 +58,7 @@ impl<T: Float> Add<Vec2<T>> for Vec2<T> {
     }
 }
 
-impl<T: Float> Sub<Vec2<T>> for Vec2<T> {
+impl<T: NumTolerance> Sub<Vec2<T>> for Vec2<T> {
     type Output = Vec2<T>;
 
     fn sub(self, rhs: Vec2<T>) -> Self::Output {
@@ -61,7 +66,7 @@ impl<T: Float> Sub<Vec2<T>> for Vec2<T> {
     }
 }
 
-impl<T: Float> Neg for Vec2<T> {
+impl<T: NumTolerance> Neg for Vec2<T> {
     type Output = Vec2<T>;
 
     fn neg(self) -> Self::Output {
@@ -123,5 +128,20 @@ mod test_vectors {
 
         assert_float_eq!(c.length_squared(), 25.0, abs <= 0.0001);
         assert_float_eq!(c.length(), 5.0, abs <= 0.0001);
+    }
+
+    #[test]
+    fn test_perp() {
+        let a = Vec2::new(1.0, 0.0);
+        let b = Vec2::new(0.0, -1.0);
+        let c = Vec2::new(-3.0, 4.0);
+        let d = Vec2::new(-4.0, -3.0);
+        let e = Vec2::new(-4.0, -2.99);
+
+        assert!(a.perp(b));
+        assert!(!b.perp(c));
+        assert!(!a.perp(d));
+        assert!(c.perp(d));
+        assert!(!e.perp(c));
     }
 }

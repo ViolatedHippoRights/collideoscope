@@ -1,12 +1,11 @@
-use crate::vec2::Vec2;
-use num::Float;
+use crate::{vec2::Vec2, NumTolerance};
 
-pub struct Projection<T: Float> {
+pub struct Projection<T: NumTolerance> {
     pub min: T,
     pub max: T,
 }
 
-impl<T: Float> Projection<T> {
+impl<T: NumTolerance> Projection<T> {
     pub fn new() -> Self {
         Self {
             min: T::max_value(),
@@ -15,7 +14,7 @@ impl<T: Float> Projection<T> {
     }
 }
 
-pub fn project_onto<T: Float>(
+pub fn project_onto<T: NumTolerance>(
     position: Vec2<T>,
     vertices: &[Vec2<T>],
     axis: Vec2<T>,
@@ -32,7 +31,7 @@ pub fn project_onto<T: Float>(
     projection
 }
 
-pub fn closest_vertex<T: Float>(
+pub fn closest_vertex<T: NumTolerance>(
     point: Vec2<T>,
     position: Vec2<T>,
     vertices: &[Vec2<T>],

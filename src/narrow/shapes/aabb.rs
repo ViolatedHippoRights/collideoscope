@@ -72,15 +72,15 @@ impl<T: NumTolerance> AABB<T> {
             true => {
                 resolution.penetration = y_pen;
                 resolution.axis = match position.y < shape_position.y {
-                    true => Vec2::new(T::zero(), T::one()),
-                    false => Vec2::new(T::zero(), -T::one()),
+                    true => Vec2::new(T::zero(), -T::one()),
+                    false => Vec2::new(T::zero(), T::one()),
                 };
             }
             false => {
                 resolution.penetration = x_pen;
                 resolution.axis = match position.x < shape_position.x {
-                    true => Vec2::new(T::one(), T::zero()),
-                    false => Vec2::new(-T::one(), T::zero()),
+                    true => Vec2::new(-T::one(), T::zero()),
+                    false => Vec2::new(T::one(), T::zero()),
                 };
             }
         }
@@ -144,11 +144,10 @@ impl<T: NumTolerance> SATable<T> for AABB<T> {
     where
         S: SATable<T> + Shapeable<T>,
     {
-        if let ShapeType::AABB(aabb) = shape.shape() {
-            return self.aabb_resolution(position, aabb, shape_position);
+        match shape.shape() {
+            ShapeType::AABB(aabb) => self.aabb_resolution(position, aabb, shape_position),
+            _ => self.sat_collision_resolution(position, shape, shape_position),
         }
-
-        self.sat_collision_resolution(position, shape, shape_position)
     }
 }
 
@@ -162,6 +161,7 @@ impl<T: NumTolerance> Shapeable<T> for AABB<T> {
 mod aabb_tests {
 
     use float_eq::assert_float_eq;
+    use num::Float;
 
     use super::AABB;
     use crate::{narrow::sat::SATable, vec2::Vec2};
@@ -207,19 +207,9 @@ mod aabb_tests {
         assert!(!box1.contains_point(Vec2::new(20.0, 20.0), Vec2::new(-1.0, 0.5)));
         assert!(!box1.contains_point(Vec2::new(0.0, 0.0), Vec2::new(6.0, 1.0)));
     }
-}
-
-#[cfg(test)]
-mod aabb_aabb_collision_tests {
-
-    use float_eq::assert_float_eq;
-    use num::Float;
-
-    use super::AABB;
-    use crate::{narrow::sat::SATable, vec2::Vec2};
 
     #[test]
-    fn test_aabb_resolution() {
+    fn test_aabb_aabb_collision() {
         let box0 = AABB::new(10.0, 10.0);
         let box1 = AABB::new(2.0, 4.0);
         let box2 = AABB::new(4.0, 2.0);
@@ -227,24 +217,28 @@ mod aabb_aabb_collision_tests {
         let res0 = box0.collision_resolution(Vec2::new(5.0, 5.0), &box1, Vec2::new(1.0, -1.5));
         assert!(res0.colliding);
         assert_float_eq!(res0.penetration, 0.5, abs <= 0.01);
-        assert_float_eq!(res0.axis.dot(Vec2::new(1.0, 0.0)), 0.0, abs <= 0.01);
+        assert!(res0.axis.perp(Vec2::new(1.0, 0.0)));
+        assert!(res0.axis.y.is_sign_positive());
 
         let res0_sat =
             box0.sat_collision_resolution(Vec2::new(5.0, 5.0), &box1, Vec2::new(1.0, -1.5));
         assert!(res0_sat.colliding);
         assert_float_eq!(res0_sat.penetration, 0.5, abs <= 0.01);
-        assert_float_eq!(res0_sat.axis.dot(Vec2::new(1.0, 0.0)), 0.0, abs <= 0.01);
+        assert!(res0_sat.axis.perp(Vec2::new(1.0, 0.0)));
+        assert!(res0_sat.axis.y.is_sign_positive());
 
         let res1 = box1.collision_resolution(Vec2::new(0.0, 0.0), &box2, Vec2::new(2.75, 0.5));
         assert!(res1.colliding);
         assert_float_eq!(res1.penetration, 0.25, abs <= 0.01);
-        assert_float_eq!(res1.axis.dot(Vec2::new(0.0, 1.0)), 0.0, abs <= 0.01);
+        assert!(res1.axis.perp(Vec2::new(0.0, 1.0)));
+        assert!(res1.axis.x.is_sign_negative());
 
         let res1_sat =
             box1.sat_collision_resolution(Vec2::new(0.0, 0.0), &box2, Vec2::new(2.75, 0.5));
         assert!(res1_sat.colliding);
         assert_float_eq!(res1_sat.penetration, 0.25, abs <= 0.01);
-        assert_float_eq!(res1_sat.axis.dot(Vec2::new(0.0, 1.0)), 0.0, abs <= 0.01);
+        assert!(res1_sat.axis.perp(Vec2::new(0.0, 1.0)));
+        assert!(res1_sat.axis.x.is_sign_negative());
 
         let res2 = box2.collision_resolution(Vec2::new(0.0, 0.0), &box2, Vec2::new(8.75, 0.5));
         assert!(!res2.colliding);

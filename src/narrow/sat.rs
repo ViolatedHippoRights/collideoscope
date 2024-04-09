@@ -1,5 +1,3 @@
-use num::Float;
-
 use crate::{narrow::shapes::Shapeable, utility::Projection, vec2::Vec2, NumTolerance};
 
 pub enum Axis<T: NumTolerance> {
@@ -14,10 +12,7 @@ pub trait SATable<T: NumTolerance> {
 
     fn axis_from_point(&self, position: Vec2<T>, point: Vec2<T>) -> Vec2<T>;
 
-    fn contains_point(&self, position: Vec2<T>, point: Vec2<T>) -> bool
-    where
-        T: Float,
-    {
+    fn contains_point(&self, position: Vec2<T>, point: Vec2<T>) -> bool {
         let axes = self.axes();
         for axis in axes {
             let axis_vector = match axis {
@@ -91,13 +86,13 @@ pub trait SATable<T: NumTolerance> {
     }
 }
 
-pub struct Resolution<T: Float> {
+pub struct Resolution<T: NumTolerance> {
     pub colliding: bool,
     pub penetration: T,
     pub axis: Vec2<T>,
 }
 
-impl<T: Float> Resolution<T> {
+impl<T: NumTolerance> Resolution<T> {
     pub fn new() -> Self {
         Self {
             colliding: false,
@@ -118,7 +113,7 @@ where
     T: NumTolerance,
 {
     let mut resolution = Resolution::new();
-    let direction = pushed_position - actor_position;
+    let direction = actor_position - pushed_position;
 
     let axes = actor.axes();
     for axis in axes {
@@ -169,8 +164,7 @@ where
             false => vector,
         },
         Axis::Dynamic { point } => {
-            let closest = pushed.axis_from_point(actor_position, pushed_position + point);
-            let vector = closest - point;
+            let vector = pushed.axis_from_point(actor_position, pushed_position + point);
 
             match accurate {
                 true => vector.normalized(),
@@ -178,4 +172,14 @@ where
             }
         }
     }
+}
+
+#[cfg(test)]
+mod sat_helper_tests {
+
+    #[test]
+    fn test_half_sat() {}
+
+    #[test]
+    fn test_generate_axis() {}
 }
