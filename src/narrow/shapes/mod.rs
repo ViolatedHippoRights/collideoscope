@@ -6,7 +6,6 @@ pub mod circle;
 pub mod p_gram;
 pub mod polygon;
 pub mod triangle;
-pub mod wedge;
 
 pub enum ShapeType<'a, T: NumTolerance> {
     AABB(&'a aabb::AABB<T>),
@@ -15,7 +14,6 @@ pub enum ShapeType<'a, T: NumTolerance> {
     Pgram(&'a p_gram::Pgram<T>),
     Polygon(&'a polygon::Polygon<T>),
     Triangle(&'a triangle::Triangle<T>),
-    Wedge(&'a wedge::Wedge<T>),
     None,
 }
 

@@ -1,3 +1,4 @@
+use num::clamp;
 use std::ops::{Add, Neg, Sub};
 
 use crate::NumTolerance;
@@ -48,6 +49,17 @@ impl<T: NumTolerance> Vec2<T> {
     pub fn perp(&self, vec: Vec2<T>) -> bool {
         self.dot(vec).is_trivial_abs()
     }
+
+    pub fn scale(&self, s: T) -> Vec2<T> {
+        Vec2::new(self.x * s, self.y * s)
+    }
+
+    pub fn clamp(&self, min: Self, max: Self) -> Self {
+        Vec2::new(
+            clamp::<T>(self.x, min.x, max.x),
+            clamp::<T>(self.y, min.y, max.y),
+        )
+    }
 }
 
 impl<T: NumTolerance> Add<Vec2<T>> for Vec2<T> {
@@ -96,6 +108,9 @@ mod test_vectors {
         assert_float_eq!((a - c).y, 11.7, abs <= 0.0001);
 
         assert_float_eq!(a.dot(b), -30.0, abs <= 0.0001);
+
+        assert_float_eq!(a.scale(0.1).x, 3.0, abs <= 0.0001);
+        assert_float_eq!(a.scale(0.1).y, 1.0, abs <= 0.0001);
     }
 
     #[test]

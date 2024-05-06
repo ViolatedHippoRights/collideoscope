@@ -20,7 +20,7 @@ pub trait SATable<T: NumTolerance> {
                     vector,
                     normalized: _normalized,
                 } => vector,
-                Axis::Dynamic { point: axis_point } => point - axis_point,
+                Axis::Dynamic { point: axis_point } => point - (position + axis_point),
             };
 
             let proj = self.project(axis_vector, position);
@@ -75,9 +75,7 @@ pub trait SATable<T: NumTolerance> {
         shape_position: Vec2<T>,
     ) -> Resolution<T> {
         let resolution = half_sat_resolution(self, position, shape, shape_position, true);
-
-        let mut flipped = half_sat_resolution(shape, shape_position, self, position, true);
-        flipped.axis = -flipped.axis;
+        let flipped = half_sat_resolution(shape, shape_position, self, position, true).flipped();
 
         match resolution.penetration < flipped.penetration {
             true => resolution,
@@ -99,6 +97,12 @@ impl<T: NumTolerance> Resolution<T> {
             penetration: T::max_value(),
             axis: Vec2::<T>::zero(),
         }
+    }
+
+    pub fn flipped(mut self) -> Self {
+        self.axis = -self.axis;
+
+        self
     }
 }
 
@@ -164,7 +168,7 @@ where
             false => vector,
         },
         Axis::Dynamic { point } => {
-            let vector = pushed.axis_from_point(actor_position, pushed_position + point);
+            let vector = pushed.axis_from_point(actor_position + point, pushed_position);
 
             match accurate {
                 true => vector.normalized(),

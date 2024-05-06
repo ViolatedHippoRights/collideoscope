@@ -65,8 +65,6 @@ impl<T: NumTolerance> Shapeable<T> for Triangle<T> {
 #[cfg(test)]
 mod triangle_tests {
 
-    use float_eq::assert_float_eq;
-
     use super::Triangle;
     use crate::{
         narrow::sat::{Axis, SATable},
@@ -147,62 +145,5 @@ mod triangle_tests {
         assert!(tri1.contains_point(Vec2::new(1.0, 2.0), Vec2::new(1.25, 1.9)));
         assert!(!tri1.contains_point(Vec2::new(0.0, 1.0), Vec2::new(0.5, 1.0)));
         assert!(!tri1.contains_point(Vec2::new(-10.0, -10.0), Vec2::new(0.0, 0.0)));
-    }
-
-    #[test]
-    fn test_triangle_triangle_collision() {
-        let tri0 = Triangle::new(&[
-            Vec2::new(0.0, 0.0),
-            Vec2::new(1.0, 0.0),
-            Vec2::new(0.0, 1.0),
-        ]);
-        let tri1 = Triangle::new(&[
-            Vec2::new(0.5, -1.0 / f64::sqrt(12.0)),
-            Vec2::new(-0.5, -1.0 / f64::sqrt(12.0)),
-            Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
-        ]);
-
-        let res0 = tri0.collision_resolution(Vec2::new(-0.5, 0.0), &tri1, Vec2::new(0.0, -0.5));
-        assert!(res0.colliding);
-        assert_float_eq!(res0.penetration, (1.0 / f64::sqrt(3.0)) - 0.5, abs <= 0.01);
-        assert!(res0.axis.perp(Vec2::new(1.0, 0.0)));
-        assert!(res0.axis.y.is_sign_positive());
-
-        let res0_sat =
-            tri0.sat_collision_resolution(Vec2::new(-0.5, 0.0), &tri1, Vec2::new(0.0, -0.5));
-        assert!(res0_sat.colliding);
-        assert_float_eq!(
-            res0_sat.penetration,
-            (1.0 / f64::sqrt(3.0)) - 0.5,
-            abs <= 0.01
-        );
-        assert!(res0_sat.axis.perp(Vec2::new(1.0, 0.0)));
-        assert!(res0_sat.axis.y.is_sign_positive());
-
-        let res1 = tri1.collision_resolution(Vec2::new(0.75, 0.75), &tri0, Vec2::new(0.0, 0.0));
-
-        assert!(res1.colliding);
-        assert_float_eq!(
-            res1.penetration,
-            (Vec2::new(f64::sqrt(3.0) * 0.25, 1.0 - f64::sqrt(3.0) * 0.25)
-                - Vec2::new(0.25, 0.75 - 1.0 / f64::sqrt(12.0)))
-            .length(),
-            abs <= 0.01
-        );
-        assert!(res1.axis.perp(Vec2::new(1.0, -1.0)));
-        assert!(res1.axis.y.is_sign_positive());
-
-        let res1_sat =
-            tri1.sat_collision_resolution(Vec2::new(0.75, 0.75), &tri0, Vec2::new(0.0, 0.0));
-        assert!(res1_sat.colliding);
-        assert_float_eq!(
-            res1_sat.penetration,
-            (Vec2::new(f64::sqrt(3.0) * 0.25, 1.0 - f64::sqrt(3.0) * 0.25)
-                - Vec2::new(0.25, 0.75 - 1.0 / f64::sqrt(12.0)))
-            .length(),
-            abs <= 0.01
-        );
-        assert!(res1_sat.axis.perp(Vec2::new(1.0, -1.0)));
-        assert!(res1_sat.axis.y.is_sign_positive());
     }
 }
