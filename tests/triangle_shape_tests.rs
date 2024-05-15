@@ -1,25 +1,85 @@
-use float_eq::assert_float_eq;
-use num::Float;
-
 use collideoscope::{
-    narrow::{
-        sat::SATable,
-        shapes::{aabb::AABB, triangle::Triangle},
-    },
+    narrow::shapes::{aabb::AABB, circle::Circle, triangle::Triangle},
     vec2::Vec2,
 };
 
 pub mod shape_tests;
-use shape_tests::{dual_collides_test, dual_collision_test};
+use shape_tests::{test_collides, test_does_not_collide};
 
 #[test]
-fn test_triangle_aabb_collision() {}
+fn test_triangle_aabb_collision() {
+    let tri0 = Triangle::new(&[
+        Vec2::new(0.0, 0.0),
+        Vec2::new(2.0, 0.0),
+        Vec2::new(0.0, 3.0),
+    ]);
+    let tri1 = Triangle::new(&[
+        Vec2::new(0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(-0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
+    ]);
+
+    let aabb0 = AABB::new(2.0, 4.0);
+    let aabb1 = AABB::new(6.0, 1.0);
+
+    test_collides(
+        &tri0,
+        Vec2::zero(),
+        &aabb0,
+        Vec2::new(2.7, 1.0),
+        0.3,
+        Vec2::new(-1.0, 0.0),
+    );
+    test_collides(
+        &tri1,
+        Vec2::new(1.0, 2.0),
+        &aabb1,
+        Vec2::new(-2.3, 2.5),
+        1.0 / (20.0 * f64::sqrt(3.0)),
+        Vec2::new(f64::sqrt(3.0), -1.0),
+    );
+
+    test_does_not_collide(&tri0, Vec2::new(1.0, 1.0), &aabb1, Vec2::new(5.0, 3.1));
+    test_does_not_collide(&tri1, Vec2::zero(), &aabb0, Vec2::new(100.0, -0.1));
+}
 
 #[test]
 fn test_triangle_capsule_collision() {}
 
 #[test]
-fn test_triangle_circle_collision() {}
+fn test_triangle_circle_collision() {
+    let tri0 = Triangle::new(&[
+        Vec2::new(0.0, 0.0),
+        Vec2::new(1.0, 0.0),
+        Vec2::new(0.0, 1.0),
+    ]);
+    let tri1 = Triangle::new(&[
+        Vec2::new(-1.0, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(1.0, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
+    ]);
+    let circ = Circle::new(2.0);
+
+    test_collides(
+        &tri0,
+        Vec2::zero(),
+        &circ,
+        Vec2::new(1.9, 1.9),
+        2.0 - 1.4 * f64::sqrt(2.0),
+        Vec2::new(-1.0, -1.0),
+    );
+    test_collides(
+        &tri1,
+        Vec2::new(-1.0, 2.0),
+        &circ,
+        Vec2::new(-1.0, 3.9 + 1.0 / f64::sqrt(3.0)),
+        0.1,
+        Vec2::new(0.0, -1.0),
+    );
+
+    test_does_not_collide(&tri0, Vec2::zero(), &circ, Vec2::new(-1.8, 2.8));
+    test_does_not_collide(&tri1, Vec2::new(100.0, 15.1), &circ, Vec2::new(32.1, -4.0));
+}
 
 #[test]
 fn test_triangle_pgram_collision() {}
@@ -40,28 +100,25 @@ fn test_triangle_triangle_collision() {
         Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
     ]);
 
-    let res0 = tri0.collision_resolution(Vec2::new(-0.5, 0.0), &tri1, Vec2::new(0.0, -0.5));
-    assert!(res0.colliding);
-    assert_float_eq!(res0.penetration, (1.0 / f64::sqrt(3.0)) - 0.5, abs <= 0.01);
-    assert!(res0.axis.perp(Vec2::new(1.0, 0.0)));
-    assert!(res0.axis.y.is_sign_positive());
-    dual_collision_test(&tri0, Vec2::new(-0.5, 0.0), &tri1, Vec2::new(0.0, -0.5));
+    let root2 = 1.0 / f64::sqrt(2.0);
 
-    let res1 = tri1.collision_resolution(Vec2::new(0.75, 0.75), &tri0, Vec2::zero());
-    assert!(res1.colliding);
-    assert_float_eq!(
-        res1.penetration,
-        (Vec2::new(f64::sqrt(3.0) * 0.25, 1.0 - f64::sqrt(3.0) * 0.25)
-            - Vec2::new(0.25, 0.75 - 1.0 / f64::sqrt(12.0)))
-        .length(),
-        abs <= 0.01
+    test_collides(
+        &tri0,
+        Vec2::new(-0.5, 0.0),
+        &tri1,
+        Vec2::new(0.0, -0.5),
+        (1.0 / f64::sqrt(3.0)) - 0.5,
+        Vec2::new(0.0, 1.0),
     );
-    assert!(res1.axis.perp(Vec2::new(1.0, -1.0)));
-    assert!(res1.axis.y.is_sign_positive());
-    dual_collision_test(&tri1, Vec2::new(0.75, 0.75), &tri0, Vec2::zero());
+    test_collides(
+        &tri1,
+        Vec2::new(0.75, 0.75),
+        &tri0,
+        Vec2::zero(),
+        root2 - Vec2::new(0.25, 0.75 - 1.0 / f64::sqrt(12.0)).dot(Vec2::new(root2, root2)),
+        Vec2::new(1.0, 1.0),
+    );
 
-    let coll = tri1.collision_resolution(Vec2::new(2.0, 2.0), &tri1, Vec2::new(0.5, 0.5));
-    assert!(!coll.colliding);
-    assert!(!tri1.collides(Vec2::new(2.0, 2.0), &tri1, Vec2::new(0.5, 0.5)));
-    dual_collides_test(&tri1, Vec2::new(2.0, 2.0), &tri0, Vec2::new(0.5, 0.5));
+    test_does_not_collide(&tri1, Vec2::new(2.0, 2.0), &tri1, Vec2::new(0.5, 0.5));
+    test_does_not_collide(&tri0, Vec2::new(100.0, 1.0), &tri1, Vec2::new(75.0, 10.0));
 }

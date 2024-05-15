@@ -7,7 +7,7 @@ use collideoscope::{
 };
 
 pub mod shape_tests;
-use shape_tests::{dual_collides_test, dual_collision_test};
+use shape_tests::{test_collides, test_does_not_collide};
 
 #[test]
 fn test_polygon_aabb_collision() {}

@@ -75,7 +75,16 @@ pub trait SATable<T: NumTolerance> {
         shape_position: Vec2<T>,
     ) -> Resolution<T> {
         let resolution = half_sat_resolution(self, position, shape, shape_position, true);
+
+        if !resolution.colliding {
+            return resolution;
+        }
+
         let flipped = half_sat_resolution(shape, shape_position, self, position, true).flipped();
+
+        if !flipped.colliding {
+            return flipped;
+        }
 
         match resolution.penetration < flipped.penetration {
             true => resolution,
@@ -135,6 +144,7 @@ where
         let actor_pen = actor_proj.max - pushed_proj.min;
         let pushed_pen = pushed_proj.max - actor_proj.min;
         let penetration = T::min(actor_pen, pushed_pen);
+
         if penetration < resolution.penetration {
             resolution.penetration = penetration;
             resolution.axis = axis_vector;
@@ -168,7 +178,7 @@ where
             false => vector,
         },
         Axis::Dynamic { point } => {
-            let vector = pushed.axis_from_point(actor_position + point, pushed_position);
+            let vector = pushed.axis_from_point(pushed_position, actor_position + point);
 
             match accurate {
                 true => vector.normalized(),
