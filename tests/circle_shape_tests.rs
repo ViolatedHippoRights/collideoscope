@@ -1,5 +1,5 @@
 use collideoscope::{
-    narrow::shapes::{aabb::AABB, circle::Circle, triangle::Triangle},
+    narrow::shapes::{aabb::AABB, capsule::Capsule, circle::Circle, triangle::Triangle},
     vec2::Vec2,
 };
 
@@ -34,7 +34,32 @@ fn test_circle_aabb_collision() {
 }
 
 #[test]
-fn test_circle_capsule_collision() {}
+fn test_circle_capsule_collision() {
+    let cap0 = Capsule::new(Vec2::new(0.0, 3.0), 1.0);
+    let cap1 = Capsule::new(Vec2::new(3.0, -4.0), 2.0);
+
+    let circ = Circle::new(1.0);
+
+    test_collides(
+        &circ,
+        Vec2::new(0.0, 4.8),
+        &cap0,
+        Vec2::zero(),
+        0.2,
+        Vec2::new(0.0, 1.0),
+    );
+    test_collides(
+        &circ,
+        Vec2::new(-1.32, -0.74),
+        &cap1,
+        Vec2::new(1.0, 1.0),
+        0.1,
+        Vec2::new(-0.8, -0.6),
+    );
+
+    test_does_not_collide(&circ, Vec2::new(-1.5, -4.5), &cap0, Vec2::zero());
+    test_does_not_collide(&circ, Vec2::new(10.0, 5.0), &cap1, Vec2::new(11.17, 32.5));
+}
 
 #[test]
 fn test_circle_circle_collision() {

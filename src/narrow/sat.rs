@@ -145,6 +145,17 @@ where
         let pushed_pen = pushed_proj.max - actor_proj.min;
         let penetration = T::min(actor_pen, pushed_pen);
 
+        println!(
+            "Pen: {}, Axis: {}, {} LPen: {}, {}, RPen: {}, {}",
+            penetration,
+            axis_vector.x,
+            axis_vector.y,
+            actor_proj.min,
+            actor_proj.max,
+            pushed_proj.min,
+            pushed_proj.max
+        );
+
         if penetration < resolution.penetration {
             resolution.penetration = penetration;
             resolution.axis = axis_vector;
