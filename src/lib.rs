@@ -17,6 +17,10 @@ pub trait NumTolerance: Display + Float {
 
     fn error_abs(&self) -> Self;
 
+    fn is_between(&self, lower: Self, upper: Self) -> bool {
+        lower.is_difference_small(*self) && self.is_difference_small(upper)
+    }
+
     fn is_difference_small(&self, rhs: Self) -> bool {
         *self - rhs < self.error_mixed(rhs)
     }

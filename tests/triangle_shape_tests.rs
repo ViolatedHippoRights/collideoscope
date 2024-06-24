@@ -1,5 +1,7 @@
 use collideoscope::{
-    narrow::shapes::{aabb::AABB, capsule::Capsule, circle::Circle, triangle::Triangle},
+    narrow::shapes::{
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+    },
     vec2::Vec2,
 };
 
@@ -111,7 +113,41 @@ fn test_triangle_circle_collision() {
 }
 
 #[test]
-fn test_triangle_pgram_collision() {}
+fn test_triangle_pgram_collision() {
+    let tri0 = Triangle::new(&[
+        Vec2::new(0.0, 0.0),
+        Vec2::new(2.0, 0.0),
+        Vec2::new(0.0, 3.0),
+    ]);
+    let tri1 = Triangle::new(&[
+        Vec2::new(0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(-0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
+    ]);
+
+    let gram0 = Pgram::new(Vec2::new(1.0, 1.0), Vec2::new(-2.0, 2.0));
+    let gram1 = Pgram::new(Vec2::new(6.0, 0.0), Vec2::new(0.0, 1.0));
+
+    test_collides(
+        &tri0,
+        Vec2::zero(),
+        &gram0,
+        Vec2::new(1.5, -1.2),
+        0.3,
+        Vec2::new(0.0, 1.0),
+    );
+    test_collides(
+        &tri1,
+        Vec2::new(1.0, 2.0),
+        &gram1,
+        Vec2::new(-2.3, 2.5),
+        1.0 / (20.0 * f64::sqrt(3.0)),
+        Vec2::new(f64::sqrt(3.0), -1.0),
+    );
+
+    test_does_not_collide(&tri0, Vec2::new(1.0, 1.0), &gram1, Vec2::new(5.0, 3.1));
+    test_does_not_collide(&tri1, Vec2::zero(), &gram0, Vec2::new(100.0, -0.1));
+}
 
 #[test]
 fn test_triangle_polygon_collision() {}
