@@ -54,9 +54,11 @@ pub fn test_collides<T: NumTolerance>(
     );
     assert!(
         l_res.penetration.is_difference_trivial(expected_pen),
-        "Expected: {} | Actual: {}",
+        "Expected: {} | Actual: {}, Axis: {} {}",
         expected_pen,
-        l_res.penetration
+        l_res.penetration,
+        l_res.axis.x,
+        l_res.axis.y
     );
     assert!(
         l_res.axis.rotate_counter_90().perp(expected_axis),
@@ -83,9 +85,11 @@ pub fn test_collides<T: NumTolerance>(
     );
     assert!(
         r_res.penetration.is_difference_trivial(expected_pen),
-        "Expected: {} | Actual: {}",
+        "Expected: {} | Actual: {}, Axis: {}, {}",
         expected_pen,
-        r_res.penetration
+        r_res.penetration,
+        r_res.axis.x,
+        r_res.axis.y
     );
     assert!(
         r_res.axis.rotate_counter_90().perp(expected_axis),
