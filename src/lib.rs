@@ -135,4 +135,7 @@ mod test_tolerance {
         assert!(10.0.is_difference_small(11.0));
         assert!(!11.0.is_difference_small(10.0));
     }
+
+    #[test]
+    fn test_between() {}
 }

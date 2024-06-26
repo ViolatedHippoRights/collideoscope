@@ -67,33 +67,9 @@ mod triangle_tests {
 
     use super::Triangle;
     use crate::{
-        narrow::sat::{Axis, SATable},
+        narrow::{sat::SATable, shapes::contains_perpendicular},
         vec2::Vec2,
-        NumTolerance,
     };
-
-    fn contains_perpendicular<T: NumTolerance>(
-        axes: impl Iterator<Item = Axis<T>>,
-        perp: Vec2<T>,
-    ) -> bool {
-        for axis in axes {
-            match axis {
-                Axis::Static {
-                    vector,
-                    normalized: _,
-                } => {
-                    if vector.dot(perp).is_trivial_abs() {
-                        return true;
-                    }
-                }
-                Axis::Dynamic { point: _ } => {
-                    return false;
-                }
-            }
-        }
-
-        false
-    }
 
     #[test]
     fn test_axes() {

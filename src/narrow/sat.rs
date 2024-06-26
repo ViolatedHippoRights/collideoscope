@@ -23,11 +23,20 @@ pub trait SATable<T: NumTolerance> {
                 Axis::Dynamic { point: axis_point } => point - (position + axis_point),
             };
 
-            let proj = self.project(axis_vector, position);
-            let point_proj = axis_vector.dot(point);
+            if !axis_vector.length_squared().is_trivial_abs() {
+                let proj = self.project(axis_vector, position);
+                let point_proj = axis_vector.dot(point);
 
-            if point_proj < proj.min || point_proj > proj.max {
-                return false;
+                println!(
+                    "{}, {}, {}, {}, {}",
+                    axis_vector.x, axis_vector.y, proj.min, proj.max, point_proj
+                );
+
+                if point_proj.is_difference_small(proj.min)
+                    || proj.max.is_difference_small(point_proj)
+                {
+                    return false;
+                }
             }
         }
 
