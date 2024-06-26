@@ -137,5 +137,11 @@ mod test_tolerance {
     }
 
     #[test]
-    fn test_between() {}
+    fn test_between() {
+        assert!((-10.5).is_between(-11.0, -10.4));
+        assert!(1.0.is_between(0.0, 2.0));
+        assert!(5.6.is_between(-1.0, 12.7));
+        assert!(!(1.0.is_between(2.0, 3.0)));
+        assert!(!((-1.001).is_between(-1.0, 2.0)));
+    }
 }
