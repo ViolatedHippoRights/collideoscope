@@ -1,6 +1,7 @@
 use collideoscope::{
     narrow::shapes::{
-        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, polygon::Polygon,
+        triangle::Triangle,
     },
     vec2::Vec2,
 };
@@ -122,7 +123,43 @@ fn test_circle_pgram_collision() {
 }
 
 #[test]
-fn test_circle_polygon_collision() {}
+fn test_circle_polygon_collision() {
+    let circ = Circle::new(2.0);
+
+    let tri = Polygon::new(vec![
+        Vec2::new(1.0, 0.0),
+        Vec2::new(1.0, 1.0),
+        Vec2::new(-3.0, -0.5),
+    ])
+    .unwrap();
+    let gram = Polygon::new(vec![
+        Vec2::new(-1.0, -1.5),
+        Vec2::new(0.0, -1.5),
+        Vec2::new(1.0, 1.5),
+        Vec2::new(0.0, 1.5),
+    ])
+    .unwrap();
+
+    test_collides(
+        &circ,
+        Vec2::new(2.8, 0.7),
+        &tri,
+        Vec2::zero(),
+        0.2,
+        Vec2::new(1.0, 0.0),
+    );
+    test_collides(
+        &circ,
+        Vec2::zero(),
+        &gram,
+        Vec2::new(-2.8, -1.5),
+        0.2,
+        Vec2::new(1.0, 0.0),
+    );
+
+    test_does_not_collide(&circ, Vec2::new(2.0, 4.01), &tri, Vec2::new(2.0, 1.0));
+    test_does_not_collide(&circ, Vec2::zero(), &gram, Vec2::new(30.0, 15.0));
+}
 
 #[test]
 fn test_circle_triangle_collision() {

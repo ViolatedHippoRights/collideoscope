@@ -1,6 +1,7 @@
 use collideoscope::{
     narrow::shapes::{
-        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, polygon::Polygon,
+        triangle::Triangle,
     },
     vec2::Vec2,
 };
@@ -127,7 +128,39 @@ fn test_pgram_pgram_collision() {
 }
 
 #[test]
-fn test_pgram_polygon_collision() {}
+fn test_pgram_polygon_collision() {
+    let gram0 = Pgram::new(Vec2::new(1.0, 1.0), Vec2::new(-2.0, -1.0));
+    let gram1 = Pgram::new(Vec2::new(1.0, 1.0), Vec2::new(3.0, 0.0));
+
+    let gon0 = Polygon::new(vec![Vec2::zero(), Vec2::new(3.0, 4.0), Vec2::new(0.0, 4.0)]).unwrap();
+    let gon1 = Polygon::new(vec![
+        Vec2::new(-1.0, -1.0),
+        Vec2::new(1.0, -1.0),
+        Vec2::new(1.0, 1.0),
+        Vec2::new(-1.0, 1.0),
+    ])
+    .unwrap();
+
+    test_collides(
+        &gram0,
+        Vec2::zero(),
+        &gon0,
+        Vec2::new(1.4, 0.0),
+        0.1,
+        Vec2::new(-1.0, 0.0),
+    );
+    test_collides(
+        &gram1,
+        Vec2::zero(),
+        &gon1,
+        Vec2::new(2.4, -0.9),
+        f64::sqrt(0.02),
+        Vec2::new(-1.0, 1.0),
+    );
+
+    test_does_not_collide(&gram0, Vec2::new(-0.5, 4.7), &gon0, Vec2::zero());
+    test_does_not_collide(&gram1, Vec2::new(32.8, 10.0), &gon1, Vec2::new(15.1, 23.2));
+}
 
 #[test]
 fn test_pgram_triangle_collision() {

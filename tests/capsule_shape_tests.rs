@@ -1,6 +1,7 @@
 use collideoscope::{
     narrow::shapes::{
-        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, polygon::Polygon,
+        triangle::Triangle,
     },
     vec2::Vec2,
 };
@@ -122,7 +123,44 @@ fn test_capsule_pgram_collision() {
 }
 
 #[test]
-fn test_capsule_polygon_collision() {}
+fn test_capsule_polygon_collision() {
+    let cap0 = Capsule::new(Vec2::new(2.0, 0.0), 1.0);
+    let cap1 = Capsule::new(Vec2::new(2.0, 2.0), 2.0);
+
+    let tri = Polygon::new(vec![
+        Vec2::new(1.0, 0.0),
+        Vec2::new(0.0, 1.0),
+        Vec2::new(-1.0, 0.0),
+    ])
+    .unwrap();
+    let gram = Polygon::new(vec![
+        Vec2::new(-1.0, -0.5),
+        Vec2::new(1.0, -0.5),
+        Vec2::new(1.0, 0.5),
+        Vec2::new(-1.0, 0.5),
+    ])
+    .unwrap();
+
+    test_collides(
+        &cap0,
+        Vec2::new(0.0, 1.0),
+        &tri,
+        Vec2::new(-3.9, 1.0),
+        0.1,
+        Vec2::new(1.0, 0.0),
+    );
+    test_collides(
+        &cap1,
+        Vec2::new(1.0, -2.0),
+        &gram,
+        Vec2::new(0.0, 0.4),
+        2.0 - f64::sqrt(2.0) + (0.1 / f64::sqrt(2.0)),
+        Vec2::new(1.0, -1.0),
+    );
+
+    test_does_not_collide(&cap0, Vec2::new(0.0, -1.6), &gram, Vec2::zero());
+    test_does_not_collide(&cap1, Vec2::new(35.0, -0.5), &tri, Vec2::new(100.0, 0.5));
+}
 
 #[test]
 fn test_capsule_triangle_collision() {

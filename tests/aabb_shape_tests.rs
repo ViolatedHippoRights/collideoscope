@@ -1,6 +1,7 @@
 use collideoscope::{
     narrow::shapes::{
-        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, polygon::Polygon,
+        triangle::Triangle,
     },
     vec2::Vec2,
 };
@@ -125,7 +126,44 @@ fn test_aabb_pgram_collision() {
 }
 
 #[test]
-fn test_aabb_polygon_collision() {}
+fn test_aabb_polygon_collision() {
+    let box0 = AABB::new(1.0, 2.0);
+    let box1 = AABB::new(2.0, 2.0);
+
+    let poly0 = Polygon::new(vec![
+        Vec2::new(0.0, 0.0),
+        Vec2::new(1.0, 0.0),
+        Vec2::new(0.0, -1.0),
+    ])
+    .unwrap();
+    let poly1 = Polygon::new(vec![
+        Vec2::new(-0.5, 0.0),
+        Vec2::new(1.5, 1.0),
+        Vec2::new(0.5, 0.0),
+        Vec2::new(-0.5, -1.0),
+    ])
+    .unwrap();
+
+    test_collides(
+        &box0,
+        Vec2::new(2.0, 1.0),
+        &poly0,
+        Vec2::new(2.0, 2.6),
+        0.4,
+        Vec2::new(0.0, -1.0),
+    );
+    test_collides(
+        &box1,
+        Vec2::zero(),
+        &poly1,
+        Vec2::new(0.0, 1.9),
+        0.1,
+        Vec2::new(0.0, -1.0),
+    );
+
+    test_does_not_collide(&box0, Vec2::zero(), &poly1, Vec2::new(-2.0, 2.0));
+    test_does_not_collide(&box1, Vec2::new(25.0, 4.17), &poly0, Vec2::zero());
+}
 
 #[test]
 fn test_aabb_triangle_collision() {

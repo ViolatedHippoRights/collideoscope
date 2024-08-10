@@ -196,13 +196,3 @@ where
         }
     }
 }
-
-#[cfg(test)]
-mod sat_helper_tests {
-
-    #[test]
-    fn test_half_sat() {}
-
-    #[test]
-    fn test_generate_axis() {}
-}

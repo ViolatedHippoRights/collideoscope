@@ -1,6 +1,7 @@
 use collideoscope::{
     narrow::shapes::{
-        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, triangle::Triangle,
+        aabb::AABB, capsule::Capsule, circle::Circle, p_gram::Pgram, polygon::Polygon,
+        triangle::Triangle,
     },
     vec2::Vec2,
 };
@@ -150,7 +151,53 @@ fn test_triangle_pgram_collision() {
 }
 
 #[test]
-fn test_triangle_polygon_collision() {}
+fn test_triangle_polygon_collision() {
+    let tri0 = Triangle::new(&[
+        Vec2::new(0.0, 0.0),
+        Vec2::new(2.0, 0.0),
+        Vec2::new(0.0, 3.0),
+    ]);
+    let tri1 = Triangle::new(&[
+        Vec2::new(0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(-0.5, -1.0 / f64::sqrt(12.0)),
+        Vec2::new(0.0, 1.0 / f64::sqrt(3.0)),
+    ]);
+
+    let gon0 = Polygon::new(vec![
+        Vec2::new(0.5, -1.5),
+        Vec2::new(1.5, -0.5),
+        Vec2::new(-0.5, 1.5),
+        Vec2::new(-1.5, 0.5),
+    ])
+    .unwrap();
+    let gon1 = Polygon::new(vec![
+        Vec2::new(-3.0, -0.5),
+        Vec2::new(3.0, -0.5),
+        Vec2::new(3.0, 0.5),
+        Vec2::new(-3.0, 0.5),
+    ])
+    .unwrap();
+
+    test_collides(
+        &tri0,
+        Vec2::zero(),
+        &gon0,
+        Vec2::new(1.5, -1.2),
+        0.3,
+        Vec2::new(0.0, 1.0),
+    );
+    test_collides(
+        &tri1,
+        Vec2::new(1.0, 2.0),
+        &gon1,
+        Vec2::new(-2.3, 2.5),
+        1.0 / (20.0 * f64::sqrt(3.0)),
+        Vec2::new(f64::sqrt(3.0), -1.0),
+    );
+
+    test_does_not_collide(&tri0, Vec2::new(1.0, 1.0), &gon1, Vec2::new(5.0, 3.1));
+    test_does_not_collide(&tri1, Vec2::zero(), &gon0, Vec2::new(15.5, 10.7));
+}
 
 #[test]
 fn test_triangle_triangle_collision() {
